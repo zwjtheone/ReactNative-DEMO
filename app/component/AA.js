@@ -10,14 +10,17 @@
  */
 import React, {Component} from 'react';
 import {
-	View, Text, ListView, RefreshControl, ActivityIndicator, StyleSheet, Image, Dimensions, TouchableHighlight
+	View, Text, ListView, RefreshControl, ActivityIndicator, StyleSheet, Dimensions, TouchableOpacity, Modal
 } from 'react-native';
-import Progress from 'react-native-progress';
+import Image from 'react-native-image-progress';
+import ProgressBar from 'react-native-progress/Bar';
+import ImageViewer from 'react-native-image-zoom-viewer';
 import {Header} from '../common/Header';
 var cachedResults = {
 	nextPage: 1,
 	item    : [],
-	total   : 0
+	total   : 0,
+	imgIndex: 0
 };
 class AAHome extends Component {
 	constructor(props) {
@@ -26,23 +29,36 @@ class AAHome extends Component {
 		this.state = {
 			listViewData: ds.cloneWithRows([]),
 			loaded      : false,//控制Request请求是否加载完毕
-			isRefreshing: false
-		}
+			isRefreshing: false,
+			modalVisible: false,
+			imgIndexw   : 0
+		};
+		console.log('AAhome ')
+	}
+
+	_setModalVisible(visible) {
+		let isTF = !this.state.modalVisible;
+		this.setState({modalVisible: isTF});
+	}
+
+	_onPressImage(index) {
+		console.log('onPress');
+		console.log(index);
+		this.setState({modalVisible: true, imgIndexw: index});
 	}
 
 	renderRow(row) {
+		cachedResults.imgIndex += 1;
 		return (
-			<Image
-				style={styles.thumb}
-				source={{uri: row.url}}
-				indicator={Progress.Pie}
-				indicatorProps={{
-					size: 80,
-					borderWidth: 0,
-					color: 'rgba(150, 150, 150, 1)',
-					unfilledColor: 'rgba(200, 200, 200, 0.2)'
-				}}
-			/>
+			<TouchableOpacity
+				onPress={this._onPressImage.bind(this,cachedResults.imgIndex)}
+				activeOpacity={1}>
+				<Image
+					style={styles.thumb}
+					source={{uri: row.url}}
+					indicator={ProgressBar}
+				/>
+			</TouchableOpacity>
 		)
 	}
 
@@ -97,9 +113,16 @@ class AAHome extends Component {
 	render() {
 		return (
 			<View >
+				<Modal
+					visible={this.state.modalVisible}
+					transparent={true}
+					animationType={"slide"}
+					onRequestClose={() => {this._setModalVisible(false)}}>
+					<ImageViewer index={this.state.imgIndexw-=1} imageUrls={cachedResults.item} />
+				</Modal>
 				<ListView
 					dataSource={this.state.listViewData}
-					renderRow={this.renderRow}
+					renderRow={this.renderRow.bind(this)}
 					contentContainerStyle={styles.list}
 					enableEmptySections={true}
 					renderFooter={this._renderFooter.bind(this)}
