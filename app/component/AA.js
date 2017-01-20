@@ -10,11 +10,11 @@
  */
 import React, {Component} from 'react';
 import {
-	View, Text, ListView, RefreshControl, ActivityIndicator, StyleSheet, Dimensions, TouchableOpacity, Modal
+	View, Text, ListView, RefreshControl, ActivityIndicator, StyleSheet, Dimensions
 } from 'react-native';
 import Image from 'react-native-image-progress';
-import ProgressBar from 'react-native-progress/Bar';
-import ImageViewer from 'react-native-image-zoom-viewer';
+import ProgressPie from 'react-native-progress/Pie';
+import Lightbox from 'react-native-lightbox';
 import {Header} from '../common/Header';
 var cachedResults = {
 	nextPage: 1,
@@ -36,29 +36,17 @@ class AAHome extends Component {
 		console.log('AAhome ')
 	}
 
-	_setModalVisible(visible) {
-		let isTF = !this.state.modalVisible;
-		this.setState({modalVisible: isTF});
-	}
-
-	_onPressImage(index) {
-		console.log('onPress');
-		console.log(index);
-		this.setState({modalVisible: true, imgIndexw: index});
-	}
-
 	renderRow(row) {
 		cachedResults.imgIndex += 1;
+		console.log('cachedResults' + cachedResults.imgIndex);
 		return (
-			<TouchableOpacity
-				onPress={this._onPressImage.bind(this,cachedResults.imgIndex)}
-				activeOpacity={1}>
+			<Lightbox style={styles.lightBox} underlayColor="white" navigator={this.props.navigator}>
 				<Image
 					style={styles.thumb}
 					source={{uri: row.url}}
-					indicator={ProgressBar}
+					indicator={ProgressPie}
 				/>
-			</TouchableOpacity>
+			</Lightbox>
 		)
 	}
 
@@ -113,13 +101,6 @@ class AAHome extends Component {
 	render() {
 		return (
 			<View >
-				<Modal
-					visible={this.state.modalVisible}
-					transparent={true}
-					animationType={"slide"}
-					onRequestClose={() => {this._setModalVisible(false)}}>
-					<ImageViewer index={this.state.imgIndexw-=1} imageUrls={cachedResults.item} />
-				</Modal>
 				<ListView
 					dataSource={this.state.listViewData}
 					renderRow={this.renderRow.bind(this)}
@@ -146,20 +127,25 @@ class AAHome extends Component {
 	}
 }
 const styles = StyleSheet.create({
-	list     : {
+	list    : {
 		justifyContent: 'center',
+		flexDirection:'row',
+		flexWrap:'wrap'
 	},
-	thumb    : {
+	thumb   : {
 		justifyContent: 'center',
 		width         : Dimensions.get('window').width,
 		height        : Dimensions.get('window').height * .8,
 		marginBottom  : 5
 	},
-	text     : {
+	text    : {
 		flex      : 1,
 		marginTop : 5,
 		fontWeight: 'bold'
 	},
-	centering: {}
+	lightBox: {
+		width : Dimensions.get('window').width / 2,
+		height: Dimensions.get('window').height / 2
+	}
 });
 export {AAHome}
