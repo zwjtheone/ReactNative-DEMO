@@ -11,72 +11,30 @@
 import React, {Component} from 'react';
 import {
 	AppRegistry,
-	StyleSheet,
-	Text,
-	View,
-	Image,
-	ListView,
 	Navigator
 } from 'react-native';
-import SideMenu from'react-native-side-menu';
 import {AAHome} from './app/component/AA';
-import {Menu} from './app/component/Menu';
-// class Menu extends Component {
-// 	constructor(props) {
-// 		super(props);
-// 		this.state = {
-// 			selectedTab : 'aa',
-// 			isOpen      : false,
-// 			selectedItem: 'About',
-// 		}
-// 	}
-//
-// 	render() {
-// 		return (
-// 			<View>
-// 				<Text>测试</Text>
-// 			</View>
-//
-// 		);
-// 	}
-// }
+
 class AwesomeProject2 extends Component {
-	constructor(props) {
-		super(props);
-		this.state = {
-			selectedTab : 'aa',
-			isOpen      : false,
-			selectedItem: 'About',
-		}
+	/**
+	 * 使用动态页面加载
+	 * @param route 路由
+	 * @param navigator 导航器
+	 * @returns {XML} 页面
+	 */
+	_renderScene(route, navigator) {
+		return <route.component navigator={navigator}  {...route.params} />;
 	}
-
-	updateMenuState(isOpen) {
-		this.setState({isOpen,});
+	_configureScene(){
+		return Navigator.SceneConfigs.FloatFromRight;
 	}
-
-	onMenuItemSelected(item) {
-		this.setState({
-			isOpen      : false,
-			selectedItem: item,
-		});
-	}
-
 	render() {
 		return (
-			<SideMenu
-				menu={<Menu />}
-				isOpen={this.state.isOpen}
-				onChange={(isOpen) => this.updateMenuState(isOpen)}>
-				<AAHome />
-			</SideMenu>
+			<Navigator
+				initialRoute={{name:'MeiZi',component: AAHome}}
+				configureScene={this._configureScene.bind(this)}
+				renderScene={this._renderScene.bind(this)} />
 		);
 	}
 }
-const styles = StyleSheet.create({
-	container   : {
-		flex           : 1,
-		backgroundColor: '#F5FCFF',
-	},
-
-});
 AppRegistry.registerComponent('AwesomeProject2', () => AwesomeProject2);

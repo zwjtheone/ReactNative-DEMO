@@ -10,18 +10,21 @@
  */
 import React, {Component} from 'react';
 import {
-	View, Text, ListView, RefreshControl, ActivityIndicator, StyleSheet, Dimensions
+	View, Text, CameraRoll, ListView, RefreshControl, ActivityIndicator, StyleSheet, Dimensions, Modal,
+	TouchableOpacity, TouchableHighlight
 } from 'react-native';
 import Image from 'react-native-image-progress';
 import ProgressPie from 'react-native-progress/Pie';
-import Lightbox from 'react-native-lightbox';
-import {Header} from '../common/Header';
+import ImageViewer from 'react-native-image-zoom-viewer';
+import DayDetails from './DayDetails';
+
 var cachedResults = {
 	nextPage: 1,
 	item    : [],
-	total   : 0,
-	imgIndex: 0
+	total   : 0
 };
+const screenWidth = Dimensions.get('window').width;
+const screenHeight = Dimensions.get('window').height;
 class AAHome extends Component {
 	constructor(props) {
 		super(props);
@@ -31,22 +34,37 @@ class AAHome extends Component {
 			loaded      : false,//控制Request请求是否加载完毕
 			isRefreshing: false,
 			modalVisible: false,
-			imgIndexw   : 0
+			imgIndex    : 0
 		};
-		console.log('AAhome ')
 	}
 
-	renderRow(row) {
-		cachedResults.imgIndex += 1;
-		console.log('cachedResults' + cachedResults.imgIndex);
+	_onPressButton(rowID: number) {
+		console.log(rowID);
+		this.setState({modalVisible: !this.state.modalVisible, imgIndex: parseInt(rowID)});
+	}
+	_loadPage(){
+		console.log(this.props)
+		this.props.navigator.push({
+			name:'DayDetails',
+			component: DayDetails,
+		})
+	}
+	renderRow(row: {}, sectionID: number, rowID: number) {
+		// console.log(row, sectionID, rowID)
 		return (
-			<Lightbox style={styles.lightBox} underlayColor="white" navigator={this.props.navigator}>
-				<Image
-					style={styles.thumb}
-					source={{uri: row.url}}
-					indicator={ProgressPie}
-				/>
-			</Lightbox>
+			<View style={[styles.imgView]}>
+				<TouchableHighlight onPress={this._loadPage.bind(this)}>
+					<Text style={styles.imgText}>{new Date(row.publishedAt).toLocaleDateString()}</Text>
+				</TouchableHighlight>
+				<TouchableOpacity activeOpacity={1} onPress={this._onPressButton.bind(this,rowID)}>
+					<Image style={[styles.thumb]}
+						   source={{uri: row.url}}
+						   indicator={ProgressPie}
+						   resizeMode={'cover'}
+						   onPress={this._onPressButton.bind(this,rowID)}
+					/>
+				</TouchableOpacity>
+			</View>
 		)
 	}
 
@@ -98,9 +116,16 @@ class AAHome extends Component {
 		this._fetchData(cachedResults.nextPage);
 	}
 
+	_setModalVisible(visible) {
+		this.setState({modalVisible: visible});
+	}
+
 	render() {
 		return (
 			<View >
+				<Modal visible={this.state.modalVisible} transparent={true} onRequestClose={() => {this._setModalVisible(false)}}>
+					<ImageViewer index={this.state.imgIndex} imageUrls={cachedResults.item} />
+				</Modal>
 				<ListView
 					dataSource={this.state.listViewData}
 					renderRow={this.renderRow.bind(this)}
@@ -127,25 +152,38 @@ class AAHome extends Component {
 	}
 }
 const styles = StyleSheet.create({
-	list    : {
+	list      : {
 		justifyContent: 'center',
-		flexDirection:'row',
-		flexWrap:'wrap'
+		flexDirection : 'row',
+		flexWrap      : 'wrap'
 	},
-	thumb   : {
+	thumb     : {
 		justifyContent: 'center',
-		width         : Dimensions.get('window').width,
-		height        : Dimensions.get('window').height * .8,
-		marginBottom  : 5
+		width         : Dimensions.get('window').width * .48,
+		height        : Dimensions.get('window').height * .5,
 	},
-	text    : {
+	imgText   : {
+		marginTop: 40
+	},
+	imgView   : {
+		justifyContent: 'center',
+		width         : Dimensions.get('window').width * .49,
+		height        : Dimensions.get('window').height * .5,
+		marginBottom  : 25
+	},
+	text      : {
 		flex      : 1,
 		marginTop : 5,
 		fontWeight: 'bold'
 	},
-	lightBox: {
+	lightBox  : {
 		width : Dimensions.get('window').width / 2,
 		height: Dimensions.get('window').height / 2
-	}
+	},
+	imageStyle: {
+		width          : 240,
+		height         : 360,
+		backgroundColor: 'red'
+	},
 });
 export {AAHome}
