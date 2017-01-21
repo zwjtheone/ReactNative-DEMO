@@ -17,11 +17,11 @@ import Image from 'react-native-image-progress';
 import ProgressPie from 'react-native-progress/Pie';
 import ImageViewer from 'react-native-image-zoom-viewer';
 import DayDetails from './DayDetails';
-
 var cachedResults = {
-	nextPage: 1,
-	item    : [],
-	total   : 0
+	nextPage  : 1,
+	item      : [],
+	imgUrlList: [],
+	total     : 0
 };
 const screenWidth = Dimensions.get('window').width;
 const screenHeight = Dimensions.get('window').height;
@@ -39,23 +39,23 @@ class AAHome extends Component {
 	}
 
 	_onPressButton(rowID: number) {
-		console.log(rowID);
 		this.setState({modalVisible: !this.state.modalVisible, imgIndex: parseInt(rowID)});
 	}
-	_loadPage(){
-		console.log(this.props)
+
+	_loadPage(publishedAt) {
 		this.props.navigator.push({
-			name:'DayDetails',
+			name     : 'DayDetails',
 			component: DayDetails,
+			params   : {
+				day: publishedAt
+			}
 		})
 	}
+
 	renderRow(row: {}, sectionID: number, rowID: number) {
 		// console.log(row, sectionID, rowID)
 		return (
 			<View style={[styles.imgView]}>
-				<TouchableHighlight onPress={this._loadPage.bind(this)}>
-					<Text style={styles.imgText}>{new Date(row.publishedAt).toLocaleDateString()}</Text>
-				</TouchableHighlight>
 				<TouchableOpacity activeOpacity={1} onPress={this._onPressButton.bind(this,rowID)}>
 					<Image style={[styles.thumb]}
 						   source={{uri: row.url}}
@@ -64,28 +64,53 @@ class AAHome extends Component {
 						   onPress={this._onPressButton.bind(this,rowID)}
 					/>
 				</TouchableOpacity>
+				<View>
+					<Text numberOfLines={2} onPress={this._loadPage.bind(this,row.publishedAt)} style={styles.imgText}>{row.day} {row.desc}</Text>
+				</View>
 			</View>
 		)
 	}
 
 	componentDidMount() {
-		console.log('componentDidMount');
 		this._fetchData(cachedResults.nextPage);
 	}
 
 	_fetchData(page) {
-		console.log('拉取');
-		console.log(page);
+		//拉去Image
 		fetch('http://gank.io/api/data/%E7%A6%8F%E5%88%A9/10/' + page, {
 			method: 'GET',
 		})
 		.then((response) => response.json())
-		.then((responseJson) => {
-			cachedResults.nextPage++;
-			let ds = new ListView.DataSource({rowHasChanged: (r1, r2) => r1 !== r2});
-			cachedResults.item = cachedResults.item.concat(responseJson.results);
-			console.log(cachedResults.item.length);
-			this.setState({listViewData: ds.cloneWithRows(cachedResults.item), isRefreshing: false});
+		.then((responseJsonn) => {
+
+			//拉去Text
+			fetch('http://gank.io/api/data/休息视频/10/' + page, {
+				method: 'GET',
+			})
+			.then((response) => response.json())
+			.then((responseJson) => {
+				// console.log(responseJson);
+				// console.log(responseJsonn);
+				cachedResults.nextPage++;
+				let ds = new ListView.DataSource({rowHasChanged: (r1, r2) => r1 !== r2});
+				let item = [];
+				let imgUrlList = [];
+				for (let i = 0; i < responseJson.results.length; i++) {
+					let gg = {};
+					let url = {};
+					gg.desc = responseJson.results[i].desc;
+					gg.day = responseJsonn.results[i].desc;
+					gg.url = responseJsonn.results[i].url;
+					gg.publishedAt = responseJsonn.results[i].publishedAt;
+					item.push(gg);
+				}
+				// console.log(item);//imgUrlList
+				cachedResults.item = cachedResults.item.concat(item);
+				this.setState({listViewData: ds.cloneWithRows(cachedResults.item), isRefreshing: false});
+			})
+			.catch((error) => {
+				console.error(error);
+			});
 		})
 		.catch((error) => {
 			console.error(error);
@@ -93,22 +118,22 @@ class AAHome extends Component {
 	}
 
 	_fetchMoreData() {
-		console.log('_fetchMoreData');
 		this._fetchData(cachedResults.nextPage);
 	}
 
 	_renderFooter() {
 		return (
-			<ActivityIndicator
-				animating={this.state.animating}
-				style={[styles.centering, {height: 80}]}
-				size="large"
-			/>
+			<View style={{width:screenWidth}}>
+				<ActivityIndicator
+					animating={this.state.animating}
+					style={[styles.centering, {height: 80}]}
+					size="large"
+				/>
+			</View>
 		)
 	}
 
 	_onRefresh() {
-		console.log('下拉刷新');
 		if (this.state.isRefreshing) return;
 		this.setState({isRefreshing: true});
 		cachedResults.nextPage = 0;
@@ -152,38 +177,34 @@ class AAHome extends Component {
 	}
 }
 const styles = StyleSheet.create({
-	list      : {
-		justifyContent: 'center',
-		flexDirection : 'row',
-		flexWrap      : 'wrap'
+	list     : {
+		justifyContent : 'space-around',
+		flexDirection  : 'row',
+		flexWrap       : 'wrap',
+		paddingLeft    : 5,
+		paddingRight   : 5,
+		paddingTop     : 20,
+		backgroundColor: "#F5FCFF"
 	},
-	thumb     : {
-		justifyContent: 'center',
-		width         : Dimensions.get('window').width * .48,
-		height        : Dimensions.get('window').height * .5,
+	imgView  : {
+		justifyContent: 'flex-start',
+		flexDirection : 'column',
+		width         : screenWidth / 2.15,
+		height        : screenWidth * .64,
+		marginBottom  : 20,
+		borderWidth   : 1,
+		borderColor   : '#ff6600'
 	},
-	imgText   : {
-		marginTop: 40
+	thumb    : {
+		width : screenWidth / 2,
+		height: screenWidth / 2,
 	},
-	imgView   : {
-		justifyContent: 'center',
-		width         : Dimensions.get('window').width * .49,
-		height        : Dimensions.get('window').height * .5,
-		marginBottom  : 25
+	imgText  : {
+		marginTop: 3,
+		padding  : 3
 	},
-	text      : {
-		flex      : 1,
-		marginTop : 5,
-		fontWeight: 'bold'
-	},
-	lightBox  : {
-		width : Dimensions.get('window').width / 2,
-		height: Dimensions.get('window').height / 2
-	},
-	imageStyle: {
-		width          : 240,
-		height         : 360,
-		backgroundColor: 'red'
-	},
+	centering: {
+		alignSelf: 'center'
+	}
 });
 export {AAHome}

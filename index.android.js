@@ -14,7 +14,6 @@ import {
 	Navigator
 } from 'react-native';
 import {AAHome} from './app/component/AA';
-
 class AwesomeProject2 extends Component {
 	/**
 	 * 使用动态页面加载
@@ -25,9 +24,12 @@ class AwesomeProject2 extends Component {
 	_renderScene(route, navigator) {
 		return <route.component navigator={navigator}  {...route.params} />;
 	}
-	_configureScene(){
-		return Navigator.SceneConfigs.FloatFromRight;
+
+	_configureScene() {
+		return Navigator.SceneConfigs.FloatFromBottom;
 	}
+
+
 	render() {
 		return (
 			<Navigator
