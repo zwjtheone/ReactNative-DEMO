@@ -16,7 +16,7 @@ import {
 import Image from 'react-native-image-progress';
 import ProgressPie from 'react-native-progress/Pie';
 import ImageViewer from 'react-native-image-zoom-viewer';
-import DayDetails from './DayDetails';
+import details from './details';
 var cachedResults = {
 	nextPage  : 1,
 	item      : [],
@@ -44,8 +44,8 @@ class AAHome extends Component {
 
 	_loadPage(publishedAt) {
 		this.props.navigator.push({
-			name     : 'DayDetails',
-			component: DayDetails,
+			name     : 'details',
+			component: details,
 			params   : {
 				day: publishedAt
 			}
