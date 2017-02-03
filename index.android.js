@@ -26,7 +26,7 @@ class AwesomeProject2 extends Component {
 	}
 
 	_configureScene() {
-		return Navigator.SceneConfigs.FloatFromBottom;
+		return Navigator.SceneConfigs.FadeAndroid;
 	}
 
 
