@@ -14,6 +14,7 @@ import {
 	Navigator
 } from 'react-native';
 import {AAHome} from './app/component/AA';
+import SectionListView from './app/component/test';
 class AwesomeProject2 extends Component {
 	/**
 	 * 使用动态页面加载
@@ -26,7 +27,7 @@ class AwesomeProject2 extends Component {
 	}
 
 	_configureScene() {
-		return Navigator.SceneConfigs.FadeAndroid;
+		return Navigator.SceneConfigs.PushFromRight ;
 	}
 
 
@@ -38,5 +39,11 @@ class AwesomeProject2 extends Component {
 				renderScene={this._renderScene.bind(this)} />
 		);
 	}
+
+	// render() {
+	// 	return (
+	// 		<SectionListView/>
+	// 	);
+	// }
 }
 AppRegistry.registerComponent('AwesomeProject2', () => AwesomeProject2);

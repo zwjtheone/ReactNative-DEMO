@@ -5,45 +5,30 @@ import {
 	View,
 	ListView,
 	Dimensions,
-	Modal
+	Modal,
+	TouchableOpacity,
 } from 'react-native';
+
 import Image from 'react-native-image-progress';
 import ProgressPie from 'react-native-progress/Pie';
+import Icon from 'react-native-vector-icons/Ionicons';
 import ImageViewer from 'react-native-image-zoom-viewer';
+import NavBar from './NavBar';
 import wbView from './webView';
+
+
 const screenWidth = Dimensions.get('window').width;
 const screenHeight = Dimensions.get('window').height;
 const ds = new ListView.DataSource({rowHasChanged: (r1, r2) => r1 !== r2});
 var cachedResults = {
 	item: [],
 };
-var dataBlob = [
-	{
-		"catId": 1, "catName": "给水管", "children": [
-		{"catId": 11, "catName": "给水管66"},
-		{"catId": 12, "catName": "给水管667"}]
-	},
-	{
-		"catId": 2, "catName": "排水管", "children": [
-		{"catId": 21, "catName": "排水管66"},
-		{"catId": 22, "catName": "排水管667"}]
-	},
-	{
-		"catId": 3, "catName": "水管", "children": [
-		{"catId": 31, "catName": "水管66"},
-		{"catId": 32, "catName": "水管667"}]
-	}]
+
 export default class details extends Component {
 	constructor(props) {
 		super(props);
 		this.state = {
 			day         : new Date(this.props.day).toLocaleDateString(),
-			Android     : ds.cloneWithRows([]),
-			App         : ds.cloneWithRows([]),
-			IOS         : ds.cloneWithRows([]),
-			xiuxi       : ds.cloneWithRows([]),
-			tuozhan     : ds.cloneWithRows([]),
-			fuli        : ds.cloneWithRows([]),
 			modalVisible: false,
 			imgIndex    : 0,
 			dataSource  : new ListView.DataSource({
@@ -56,15 +41,15 @@ export default class details extends Component {
 	}
 
 	_getSectionData(dataBlob, sectionID) {
-		console.log(dataBlob);
-		console.log(sectionID);
+		// console.log(dataBlob);
+		// console.log(sectionID);
 		return dataBlob[sectionID];
 	}
 
 	_getRowData(dataBlob, sectionID, rowID) {
-		console.log(dataBlob);
-		console.log(sectionID);
-		console.log(rowID);
+		// console.log(dataBlob);
+		// console.log(sectionID);
+		// console.log(dataBlob[sectionID + ":" + rowID]);
 		return dataBlob[sectionID + ":" + rowID];
 	}
 
@@ -77,64 +62,76 @@ export default class details extends Component {
 	}
 
 	_fetchData(day) {
-		var dataBlob   = {},
+		let dataBlob   = {},
 			sectionIDs = [],
-			rowIDs     = [];
-		fetch('http://gank.io/api/day/' + day, {
+			rowIDs     = [],
+			dayy       = day.split('/'),
+			that       = this;
+		// alert('http://gank.io/api/day/20' + dayy[2] + '/' + dayy[0] + '/' + dayy[1])
+		fetch('http://gank.io/api/day/20' + dayy[2] + '/' + dayy[0] + '/' + dayy[1], {
 			method: 'GET',
 		})
-		.then((response) => response.text())
+		// fetch('http://gank.io/api/day/' + day, {
+		// 	method: 'GET',
+		// })
+		.then((response) => response.json())
 		.then((responseJson) => {
+			// console.log(responseJson)
 			try {
-				console.log(JSON.parse(responseJson));
-				let data = JSON.parse(responseJson);
-				data.category.map(function (value, index, arr) {
-					sectionIDs.push(value);
+				// console.log(JSON.parse(responseJson));
+				// let data = JSON.parse(responseJson);
+				responseJson.category.map(function (value, index, arr) {
+					sectionIDs.push(index);
 					rowIDs[index] = [];
-					data.results[value].map(function (valuee, indexx, arrr) {
+					dataBlob[index] = value;
+					responseJson.results[value].map(function (valuee, indexx, arrr) {
 						// console.log(valuee)
-						rowIDs[index].push(valuee);
+						rowIDs[index].push(indexx);
 						dataBlob[index + ':' + indexx] = valuee;
 					})
 				});
-				console.log(dataBlob);
-				console.log(sectionIDs);
-				console.log(rowIDs)
+				// console.log(dataBlob);
+				// console.log(sectionIDs);
+				// console.log(rowIDs);
+				this.setState({
+					dataSource: this.state.dataSource.cloneWithRowsAndSections(dataBlob, sectionIDs, rowIDs)
+				});
 			}
 			catch (err) {
-				console.log(err);
+				alert(err)
 			}
-			this.setState({
-				dataSource: this.state.dataSource.cloneWithRowsAndSections(dataBlob, sectionIDs, rowIDs)
-			});
 		})
 		.catch((error) => {
 			console.error(error);
 		});
 	}
 
-	// _goURl(url) {
-	// 	this.props.navigator.push({
-	// 		name     : 'webView',
-	// 		component: wbView,
-	// 		params   : {
-	// 			url: url
-	// 		}
-	// 	})
-	// }
-	_renderRow(row, a, b) {
-		console.log(row, a, b)
+	_goURl(url) {
+		this.props.navigator.push({
+			name     : 'webView',
+			component: wbView,
+			params   : {
+				url: url
+			}
+		})
+	}
+
+	_renderRow(row) {
 		return (
-			<Text onPress={this._goURl.bind(this,row.url)}>{row.desc}</Text>
+			<TouchableOpacity activeOpacity={0.8} onPress={()=>{this._goURl(row.url)}}>
+				<View style={styles.rowTitleSup}>
+					<Text style={styles.rowTitle} numberOfLines={1}>{row.desc}</Text>
+					<Text style={[styles.rowTitle,styles.flexEnd]}>{row.who}</Text>
+				</View>
+			</TouchableOpacity>
 		)
 	}
 
 	// 每一组对应的数据
-	_renderSectionHeader(sectionData, sectionId, b) {
-		console.log(sectionData, sectionId, b)
+	_renderSectionHeader(sectionData) {
 		return (
-			<View >
-				<Text >{sectionData}</Text>
+			<View style={styles.sectionView}>
+				<Text style={styles.sectionTitle}>{sectionData}</Text>
 			</View>
 		);
 	}
@@ -158,38 +155,72 @@ export default class details extends Component {
 	}
 
 	render() {
+		let dayy = this.state.day.split('/');
+		const leftButtonConfig = {
+			title: '<Icon name="ios-arrow-back" size={22} color="#000" />返回',
+			handler: () => this._backToMeiZi(),
+		};
+
+		const titleConfig = {
+			title: '20' +  dayy[2] + '/' + dayy[0] + '/' + dayy[1],
+		};
 		return (
-			<View style={{paddingTop:10,flex:1,backgroundColor:'#fff'}}>
+			<View style={{flex:1,backgroundColor:'#fff'}}>
 				<Modal
 					visible={this.state.modalVisible}
 					transparent={true}
 					onRequestClose={() => {this._setModalVisible(false)}}>
 					<ImageViewer index={this.state.imgIndex} imageUrls={cachedResults.item} />
 				</Modal>
-				<Text onPress={this._backToMeiZi.bind(this)}>{this.state.day}</Text>
+				<NavBar
+					title={titleConfig}
+					leftButton={leftButtonConfig} />
 				<ListView
-					dataSource={this.state.Android}
+					dataSource={this.state.dataSource}
 					renderRow={this._renderRow.bind(this)}
-					renderSectionHeader={this._renderSectionHeader.bind(this)}
+					renderSectionHeader={this._renderSectionHeader}
 					contentContainerStyle={styles.list}
 					enableEmptySections={true}
-					showsVerticalScrollIndicator={false}
-				/>
+					showsVerticalScrollIndicator={false} />
 			</View>
 		);
 	}
 }
 const styles = StyleSheet.create({
-	list : {
-		justifyContent : 'space-around',
-		flexDirection  : 'row',
-		flexWrap       : 'wrap',
-		paddingLeft    : 5,
-		paddingRight   : 5,
-		paddingTop     : 20,
-		backgroundColor: "#F5FCFF"
+	listStyle   : {},
+	sectionView : {
+		height         : 35,
+		backgroundColor: "#c3c3c3",
+		justifyContent : "center"
 	},
-	thumb: {
+	sectionTitle: {
+		fontSize  : 18,
+		marginLeft: 16,
+	},
+	rowView     : {
+		height       : 80,
+		flexDirection: 'row',
+	},
+	rowImage    : {
+		width : 44,
+		height: 44
+	},
+	rowTitleSup : {
+		height           : 44,
+		width            : screenWidth,
+		borderBottomWidth: 1,
+		borderBottomColor: "#c3c3c3",
+		paddingLeft      : 5,
+		paddingRight     : 5
+	},
+	rowTitle    : {
+		fontSize: 16,
+	},
+	flexEnd     : {
+		alignSelf: 'flex-end',
+		fontSize : 12
+	},
+	thumb       : {
 		width : screenWidth / 2,
 		height: screenWidth / 2,
 	},

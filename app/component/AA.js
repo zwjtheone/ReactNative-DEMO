@@ -16,6 +16,8 @@ import {
 import Image from 'react-native-image-progress';
 import ProgressPie from 'react-native-progress/Pie';
 import ImageViewer from 'react-native-image-zoom-viewer';
+import NavBar from './NavBar';
+
 import details from './details';
 var cachedResults = {
 	nextPage  : 1,

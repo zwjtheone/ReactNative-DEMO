@@ -17,6 +17,10 @@ import {
 	Dimensions,
 	Text
 } from 'react-native';
+
+import NavigationBar from 'react-native-navbar';
+import Icon from 'react-native-vector-icons/Ionicons';
+
 const {width, height} = Dimensions.get('window');
 const url = "http://www.58.com";
 export default class WebViewExample extends Component {
@@ -36,9 +40,21 @@ export default class WebViewExample extends Component {
 	}
 
 	render() {
+
+		const leftButtonConfig = {
+			title: '<返回',
+			handler: () => this._backTopDetails(),
+		};
+
+		const titleConfig = {
+			title: '123',
+		};
 		return (
+
 			<View style={styles.container}>
-				<Text onPress={this._backTopDetails.bind(this)}>返回</Text>
+				<NavigationBar
+					title={titleConfig}
+					leftButton={leftButtonConfig} />
 				<WebView
 					style={{width:width,height:height-20,backgroundColor:'gray'}}
 					source={{uri:this.state.url,method: 'GET'}}
@@ -56,7 +72,6 @@ const styles = StyleSheet.create({
 	container: {
 		flex           : 1,
 		backgroundColor: '#f2f2f2',
-		paddingTop     : 20,
 	},
 });
 
