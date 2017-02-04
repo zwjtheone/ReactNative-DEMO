@@ -7,23 +7,20 @@ import {
 	Dimensions,
 	Modal,
 	TouchableOpacity,
+	ActivityIndicator
 } from 'react-native';
-
 import Image from 'react-native-image-progress';
 import ProgressPie from 'react-native-progress/Pie';
 import Icon from 'react-native-vector-icons/Ionicons';
 import ImageViewer from 'react-native-image-zoom-viewer';
 import NavBar from './NavBar';
 import wbView from './webView';
-
-
 const screenWidth = Dimensions.get('window').width;
 const screenHeight = Dimensions.get('window').height;
 const ds = new ListView.DataSource({rowHasChanged: (r1, r2) => r1 !== r2});
 var cachedResults = {
 	item: [],
 };
-
 export default class details extends Component {
 	constructor(props) {
 		super(props);
@@ -31,6 +28,7 @@ export default class details extends Component {
 			day         : new Date(this.props.day).toLocaleDateString(),
 			modalVisible: false,
 			imgIndex    : 0,
+			animating   : true,
 			dataSource  : new ListView.DataSource({
 				getSectionData         : this._getSectionData, // 获取组中数据
 				getRowData             : this._getRowData, // 获取行中的数据
@@ -67,13 +65,12 @@ export default class details extends Component {
 			rowIDs     = [],
 			dayy       = day.split('/'),
 			that       = this;
+		let url = 'http://gank.io/api/day/20' + dayy[2] + '/' + dayy[0] + '/' + dayy[1];
+		// let url = 'http://gank.io/api/day/' + day;
 		// alert('http://gank.io/api/day/20' + dayy[2] + '/' + dayy[0] + '/' + dayy[1])
-		fetch('http://gank.io/api/day/20' + dayy[2] + '/' + dayy[0] + '/' + dayy[1], {
+		fetch(url, {
 			method: 'GET',
 		})
-		// fetch('http://gank.io/api/day/' + day, {
-		// 	method: 'GET',
-		// })
 		.then((response) => response.json())
 		.then((responseJson) => {
 			// console.log(responseJson)
@@ -96,6 +93,7 @@ export default class details extends Component {
 				this.setState({
 					dataSource: this.state.dataSource.cloneWithRowsAndSections(dataBlob, sectionIDs, rowIDs)
 				});
+				setTimeout(() => this.setState({animating: false}), 900)
 			}
 			catch (err) {
 				alert(err)
@@ -106,19 +104,20 @@ export default class details extends Component {
 		});
 	}
 
-	_goURl(url) {
+	_goURl(url, title) {
 		this.props.navigator.push({
 			name     : 'webView',
 			component: wbView,
 			params   : {
-				url: url
+				url  : url,
+				title: title
 			}
 		})
 	}
 
 	_renderRow(row) {
 		return (
-			<TouchableOpacity activeOpacity={0.8} onPress={()=>{this._goURl(row.url)}}>
+			<TouchableOpacity activeOpacity={0.8} onPress={()=>{this._goURl(row.url,row.desc)}}>
 				<View style={styles.rowTitleSup}>
 					<Text style={styles.rowTitle} numberOfLines={1}>{row.desc}</Text>
 					<Text style={[styles.rowTitle,styles.flexEnd]}>{row.who}</Text>
@@ -136,16 +135,6 @@ export default class details extends Component {
 		);
 	}
 
-	// _renderImageRow(row: {}, sectionID: number, rowID: number) {
-	// 	return (
-	// 		<Image style={[styles.thumb]}
-	// 			   source={{uri: row.url}}
-	// 			   indicator={ProgressPie}
-	// 			   resizeMode={'cover'}
-	// 			   onPress={this._onPressButton.bind(this,rowID)}
-	// 		/>
-	// 	)
-	// }
 	_onPressButton(rowID: number) {
 		this.setState({modalVisible: !this.state.modalVisible, imgIndex: parseInt(rowID)});
 	}
@@ -155,15 +144,6 @@ export default class details extends Component {
 	}
 
 	render() {
-		let dayy = this.state.day.split('/');
-		const leftButtonConfig = {
-			title: '<Icon name="ios-arrow-back" size={22} color="#000" />返回',
-			handler: () => this._backToMeiZi(),
-		};
-
-		const titleConfig = {
-			title: '20' +  dayy[2] + '/' + dayy[0] + '/' + dayy[1],
-		};
 		return (
 			<View style={{flex:1,backgroundColor:'#fff'}}>
 				<Modal
@@ -172,16 +152,25 @@ export default class details extends Component {
 					onRequestClose={() => {this._setModalVisible(false)}}>
 					<ImageViewer index={this.state.imgIndex} imageUrls={cachedResults.item} />
 				</Modal>
-				<NavBar
-					title={titleConfig}
-					leftButton={leftButtonConfig} />
-				<ListView
-					dataSource={this.state.dataSource}
-					renderRow={this._renderRow.bind(this)}
-					renderSectionHeader={this._renderSectionHeader}
-					contentContainerStyle={styles.list}
-					enableEmptySections={true}
-					showsVerticalScrollIndicator={false} />
+				<NavBar title={new Date(this.props.day).toLocaleDateString()} handle={() => this.props.navigator.pop()} />
+				{
+					this.state.animating == false ? (
+							<ListView
+								dataSource={this.state.dataSource}
+								renderRow={this._renderRow.bind(this)}
+								renderSectionHeader={this._renderSectionHeader}
+								contentContainerStyle={styles.list}
+								enableEmptySections={true}
+								showsVerticalScrollIndicator={false} />
+						) : (
+							<ActivityIndicator
+								animating={this.state.animating}
+								style={[styles.centering]}
+								size="small"
+							/>
+						)
+				}
+
 			</View>
 		);
 	}
@@ -192,6 +181,12 @@ const styles = StyleSheet.create({
 		height         : 35,
 		backgroundColor: "#c3c3c3",
 		justifyContent : "center"
+	},
+	centering   : {
+		height       : screenHeight - 44,
+		alignItems    : 'center',
+		justifyContent: 'center',
+		padding       : 8,
 	},
 	sectionTitle: {
 		fontSize  : 18,

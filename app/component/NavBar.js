@@ -25,7 +25,8 @@ import {
 	View,
 	WebView,
 	Dimensions,
-	Text
+	Text,
+	TouchableOpacity
 } from 'react-native';
 import Icon from 'react-native-vector-icons/Ionicons';
 const {width, height} = Dimensions.get('window');
@@ -33,46 +34,55 @@ export default class NavBar extends Component {
 	constructor(props) {
 		super(props);
 		this.state = {
-			url: ''
+			title: this.props.title
 		}
 	}
 
 	componentWillMount() {
 	}
 
+	_goBack() {
+		this.props.handle();
+	}
+
 	render() {
 		return (
-			<View style={styles.container}>
-				<View style={[styles.licontainer,{paddingLeft:10}]}>
-					<Text style={styles.leftButton}>
-						<Icon name="ios-arrow-back" size={22} color="#000" />返回</Text>
+			<View style={[styles.container,{paddingLeft:10,paddingRight:10,}]}>
+				<TouchableOpacity style={{flex:1}} onPress={()=>{this._goBack()}}>
+					<View style={styles.leftButton}>
+						<Icon style={{lineHeight:32,paddingRight:3}} name="ios-arrow-back" size={22} color="#000" />
+						<Text style={styles.title}>返回</Text>
+					</View>
+				</TouchableOpacity>
+				<View style={[styles.licontainer,{justifyContent: 'center'}]}>
+					<Text numberOfLines={1} style={[styles.title]}>{this.state.title}</Text>
 				</View>
-				<View style={{alignSelf:'center'}}>
-					<Text style={styles.title}>Title</Text>
+				<View style={[styles.licontainer]}>
 				</View>
-				<View style={styles.licontainer}>
-				</View>
-
 			</View>
 		);
 	}
 }
 const styles = StyleSheet.create({
-	container : {
+	container  : {
 		backgroundColor: '#fff',
 		flexDirection  : 'row',
 		height         : 44,
-		alignItems:'center'
 	},
-	licontainer:{
-		flex:1
+	licontainer: {
+		flex      : 1,
+		height    : 44,
+		alignItems: 'center',
 	},
-	leftButton: {
-		base
-		// alignSelf: 'center'
+	leftButton : {
+		flexDirection: 'row',
+		alignSelf    : 'flex-start',
+		height       : 44,
+		paddingTop   : 5
 	},
-	title     : {
-		// alignSelf: 'flex-end'
+	title      : {
+		fontSize  : 16,
+		lineHeight: 32
 	}
 });
 

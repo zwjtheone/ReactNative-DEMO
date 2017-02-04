@@ -27,7 +27,7 @@ class AwesomeProject2 extends Component {
 	}
 
 	_configureScene() {
-		return Navigator.SceneConfigs.PushFromRight ;
+		return Navigator.SceneConfigs.FloatFromBottom ;
 	}
 
 

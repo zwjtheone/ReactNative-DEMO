@@ -16,7 +16,6 @@ import {
 import Image from 'react-native-image-progress';
 import ProgressPie from 'react-native-progress/Pie';
 import ImageViewer from 'react-native-image-zoom-viewer';
-import NavBar from './NavBar';
 
 import details from './details';
 var cachedResults = {
@@ -150,7 +149,7 @@ class AAHome extends Component {
 	render() {
 		return (
 			<View >
-				<Modal visible={this.state.modalVisible} transparent={true} onRequestClose={() => {this._setModalVisible(false)}}>
+				<Modal animationType={"slide"} visible={this.state.modalVisible} transparent={true} onRequestClose={() => {this._setModalVisible(false)}}>
 					<ImageViewer index={this.state.imgIndex} imageUrls={cachedResults.item} />
 				</Modal>
 				<ListView
