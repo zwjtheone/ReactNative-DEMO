@@ -14,7 +14,10 @@ import {
 	Navigator
 } from 'react-native';
 import {AAHome} from './app/component/AA';
-import SectionListView from './app/component/test';
+import Game2048 from './2048/Game2048';
+import MoviesApp from './Movies/MoviesApp.android';
+import TicTacToeApp from './TicTacToe/TicTacToeApp';
+import UIExplorerApp from './UIExplorer/js/UIExplorerApp.android.js';
 class AwesomeProject2 extends Component {
 	/**
 	 * 使用动态页面加载
@@ -46,4 +49,4 @@ class AwesomeProject2 extends Component {
 	// 	);
 	// }
 }
-AppRegistry.registerComponent('AwesomeProject2', () => AwesomeProject2);
+AppRegistry.registerComponent('AwesomeProject2', () => UIExplorerApp);
