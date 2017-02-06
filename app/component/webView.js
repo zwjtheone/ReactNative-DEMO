@@ -15,7 +15,8 @@ import {
 	View,
 	WebView,
 	Dimensions,
-	Text
+	Text,
+	BackAndroid
 } from 'react-native';
 import Icon from 'react-native-vector-icons/Ionicons';
 import NavBar from './NavBar';
@@ -27,11 +28,28 @@ export default class WebViewExample extends Component {
 		this.state = {
 			url  : '',
 			title: this.props.title
-		}
+		};
+		this.handleBack = this.handleBack.bind(this);
 	}
 
 	componentWillMount() {
+		BackAndroid.addEventListener('hardwareBackPress', this.handleBack)
 		this.setState({url: this.props.url})
+	}
+
+	componentDidUnmount() {
+		BackAndroid.removeEventListener('hardwareBackPress', this.handleBack)
+	}
+
+	handleBack() {
+		const {navigator} = this.props;
+		const routers = navigator.getCurrentRoutes();
+		console.log('当前路由长度：' + routers.length);
+		if (routers.length > 1) {
+			navigator.pop();
+			return true;//接管默认行为
+		}
+		return false;//默认行为
 	}
 
 	_backTopDetails() {

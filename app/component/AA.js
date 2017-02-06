@@ -11,7 +11,9 @@
 import React, {Component} from 'react';
 import {
 	View, Text, CameraRoll, ListView, RefreshControl, ActivityIndicator, StyleSheet, Dimensions, Modal,
-	TouchableOpacity, TouchableHighlight
+	TouchableOpacity, TouchableHighlight,
+	ToastAndroid,
+	BackAndroid
 } from 'react-native';
 import Image from 'react-native-image-progress';
 import ProgressPie from 'react-native-progress/Pie';
@@ -24,6 +26,7 @@ var cachedResults = {
 	imgUrlList: [],
 	total     : 0
 };
+var firstClick = 0;
 const screenWidth = Dimensions.get('window').width;
 const screenHeight = Dimensions.get('window').height;
 class AAHome extends Component {
@@ -37,6 +40,8 @@ class AAHome extends Component {
 			modalVisible: false,
 			imgIndex    : 0
 		};
+		this.handleBack = this.handleBack.bind(this);
+
 	}
 
 	_onPressButton(rowID: number) {
@@ -74,6 +79,31 @@ class AAHome extends Component {
 
 	componentDidMount() {
 		this._fetchData(cachedResults.nextPage);
+	}
+
+	componentWillMount() {
+		BackAndroid.addEventListener('hardwareBackPress', this.handleBack)
+	}
+
+	componentDidUnmount() {
+		BackAndroid.removeEventListener('hardwareBackPress', this.handleBack)
+	}
+
+	handleBack(){
+		var navigator = this.navigator;
+		if (navigator && navigator.getCurrentRoutes().length > 1) {
+			navigator.pop();
+			return true;
+		}else{
+			var timestamp = (new Date()).valueOf();
+			if(timestamp-firstClick>2000){
+				firstClick = timestamp;
+				ToastAndroid.show('再按一次退出', ToastAndroid.LONG)
+				return true;
+			}else{
+				return false;
+			}
+		}
 	}
 
 	_fetchData(page) {

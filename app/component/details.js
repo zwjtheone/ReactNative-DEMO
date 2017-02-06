@@ -7,7 +7,8 @@ import {
 	Dimensions,
 	Modal,
 	TouchableOpacity,
-	ActivityIndicator
+	ActivityIndicator,
+	BackAndroid
 } from 'react-native';
 import Image from 'react-native-image-progress';
 import ProgressPie from 'react-native-progress/Pie';
@@ -36,6 +37,7 @@ export default class details extends Component {
 				sectionHeaderHasChanged: (s1, s2) => s1 !== s2
 			})
 		};
+		this.handleBack = this.handleBack.bind(this);
 	}
 
 	_getSectionData(dataBlob, sectionID) {
@@ -57,6 +59,25 @@ export default class details extends Component {
 
 	componentDidMount() {
 		this._fetchData(this.state.day);
+	}
+
+	componentWillMount() {
+		BackAndroid.addEventListener('hardwareBackPress', this.handleBack)
+	}
+
+	componentDidUnmount() {
+		BackAndroid.removeEventListener('hardwareBackPress', this.handleBack)
+	}
+
+	handleBack() {
+		const {navigator} = this.props;
+		const routers = navigator.getCurrentRoutes();
+		console.log('当前路由长度：' + routers.length);
+		if (routers.length > 1) {
+			navigator.pop();
+			return true;//接管默认行为
+		}
+		return false;//默认行为
 	}
 
 	_fetchData(day) {
@@ -166,7 +187,7 @@ export default class details extends Component {
 							<ActivityIndicator
 								animating={this.state.animating}
 								style={[styles.centering]}
-								size="small"
+								size="large"
 							/>
 						)
 				}
@@ -183,7 +204,7 @@ const styles = StyleSheet.create({
 		justifyContent : "center"
 	},
 	centering   : {
-		height       : screenHeight - 44,
+		height        : screenHeight - 44,
 		alignItems    : 'center',
 		justifyContent: 'center',
 		padding       : 8,
