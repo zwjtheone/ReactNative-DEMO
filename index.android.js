@@ -18,6 +18,7 @@ import Game2048 from './demo/2048/Game2048';
 import MoviesApp from './demo/Movies/MoviesApp.android';
 import TicTacToeApp from './demo/TicTacToe/TicTacToeApp';
 import UIExplorerApp from './demo/UIExplorer/js/UIExplorerApp.android.js';
+import App from './demo/react-native-starter-kit-master/src/App.js';
 class AwesomeProject2 extends Component {
 	/**
 	 * 使用动态页面加载
@@ -49,4 +50,4 @@ class AwesomeProject2 extends Component {
 	// 	);
 	// }
 }
-AppRegistry.registerComponent('AwesomeProject2', () => AwesomeProject2);
+AppRegistry.registerComponent('AwesomeProject2', () => App);
